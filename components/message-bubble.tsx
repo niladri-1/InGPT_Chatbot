@@ -9,6 +9,7 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from 'next-themes';
+import type { PrismTheme } from 'react-syntax-highlighter';
 
 interface Message {
 	id: string;
@@ -45,7 +46,7 @@ export function MessageBubble({ message, onCopy }: MessageBubbleProps) {
 			</div>
 
 			<div className={`flex-1 max-w-4xl ${isUser ? 'flex justify-end' : ''}`}>
-				<div className={`${isUser ? 'bg-transparent' : 'bg-transparent'} rounded-lg p-4 w-full overflow-x-auto`}>
+				<div className="bg-transparent rounded-lg p-4 w-full overflow-x-auto">
 					<div className="flex flex-col space-y-3">
 						<div className="min-w-0 overflow-x-auto">
 							{isUser ? (
@@ -67,7 +68,7 @@ export function MessageBubble({ message, onCopy }: MessageBubbleProps) {
 												return !inline && match ? (
 													<div className="overflow-x-auto">
 														<SyntaxHighlighter
-															style={theme === 'dark' ? oneDark : oneLight}
+															style={(theme === 'dark' ? oneDark : oneLight) as PrismTheme}
 															language={match[1]}
 															PreTag="div"
 															className="rounded-md"
@@ -83,39 +84,25 @@ export function MessageBubble({ message, onCopy }: MessageBubbleProps) {
 												);
 											},
 											h1: ({ children }) => (
-												<h1 className="text-xl font-bold mt-6 mb-4 text-foreground/95">
-													{children}
-												</h1>
+												<h1 className="text-xl font-bold mt-6 mb-4 text-foreground/95">{children}</h1>
 											),
 											h2: ({ children }) => (
-												<h2 className="text-lg font-semibold mt-5 mb-3 text-foreground/95">
-													{children}
-												</h2>
+												<h2 className="text-lg font-semibold mt-5 mb-3 text-foreground/95">{children}</h2>
 											),
 											h3: ({ children }) => (
-												<h3 className="text-base font-medium mt-4 mb-2 text-foreground/95">
-													{children}
-												</h3>
+												<h3 className="text-base font-medium mt-4 mb-2 text-foreground/95">{children}</h3>
 											),
 											p: ({ children }) => (
-												<p className="mb-3 leading-relaxed text-foreground/85">
-													{children}
-												</p>
+												<p className="mb-3 leading-relaxed text-foreground/85">{children}</p>
 											),
 											strong: ({ children }) => (
-												<strong className="font-semibold text-foreground/95">
-													{children}
-												</strong>
+												<strong className="font-semibold text-foreground/95">{children}</strong>
 											),
 											ul: ({ children }) => (
-												<ul className="list-disc list-inside mb-3 space-y-1 text-foreground/85">
-													{children}
-												</ul>
+												<ul className="list-disc list-inside mb-3 space-y-1 text-foreground/85">{children}</ul>
 											),
 											ol: ({ children }) => (
-												<ol className="list-decimal list-inside mb-3 space-y-1 text-foreground/85">
-													{children}
-												</ol>
+												<ol className="list-decimal list-inside mb-3 space-y-1 text-foreground/85">{children}</ol>
 											),
 											li: ({ children }) => (
 												<li className="leading-relaxed">{children}</li>
