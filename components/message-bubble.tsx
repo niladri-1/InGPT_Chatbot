@@ -58,18 +58,11 @@ export function MessageBubble({ message, onCopy }: MessageBubbleProps) {
 										remarkPlugins={[remarkGfm]}
 										components={{
 											code({
-												node,
 												inline,
 												className,
 												children,
 												...props
-											}: {
-												node: any;
-												inline?: boolean;
-												className?: string;
-												children: React.ReactNode;
-												[key: string]: any;
-											}) {
+											}: React.HTMLAttributes<HTMLElement> & { inline?: boolean; children?: React.ReactNode }) {
 												const match = /language-(\w+)/.exec(className || '');
 												return !inline && match ? (
 													<div className="overflow-x-auto">
