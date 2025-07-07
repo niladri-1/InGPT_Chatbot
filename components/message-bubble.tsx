@@ -58,7 +58,7 @@ export function MessageBubble({ message, onCopy }: MessageBubbleProps) {
 									<ReactMarkdown
 										remarkPlugins={[remarkGfm]}
 										components={{
-											code({ node, inline, className, children, ...props }: ReactMarkdownProps) {
+											code({ inline, className, children, ...props }: { inline?: boolean; className?: string; children: React.ReactNode }) {
 												const match = /language-(\w+)/.exec(className || '');
 												return !inline && match ? (
 													<div className="overflow-x-auto">
