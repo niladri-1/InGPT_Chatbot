@@ -44,8 +44,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default to true
   const [typingMessage, setTypingMessage] = useState<string | null>(null);
+  const [currentTypingContent, setCurrentTypingContent] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -73,7 +75,7 @@ export default function Home() {
 
   // Improved scroll function
   const scrollToBottom = (smooth = true) => {
-    if (scrollAreaRef.current) {
+    if (scrollAreaRef.current && shouldAutoScroll) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
         scrollContainer.scrollTo({
@@ -84,17 +86,72 @@ export default function Home() {
     }
   };
 
+  // Check if user is at the bottom of the scroll area
+  const isAtBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+        return scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
+      }
+    }
+    return false;
+  };
+
+  // Handle scroll events to detect user scrolling
+  useEffect(() => {
+    const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+    if (!scrollContainer) return;
+
+    let isScrolling = false;
+    
+    const handleScroll = () => {
+      // Prevent auto-scroll detection during programmatic scrolling
+      if (isScrolling) return;
+      
+      // Check if user scrolled back to bottom
+      if (isAtBottom()) {
+        setShouldAutoScroll(true);
+      } else {
+        // Only disable auto-scroll if user manually scrolled up
+        setShouldAutoScroll(false);
+      }
+    };
+
+    // Override scrollTo to mark programmatic scrolling
+    const originalScrollTo = scrollContainer.scrollTo;
+    scrollContainer.scrollTo = function(...args: any[]) {
+      isScrolling = true;
+      originalScrollTo.apply(this, args);
+      setTimeout(() => { isScrolling = false; }, 100);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      scrollContainer.scrollTo = originalScrollTo;
+    };
+  }, []);
+
   // Scroll when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, shouldAutoScroll]);
 
   // Scroll when typing starts
   useEffect(() => {
     if (typingMessage) {
       scrollToBottom();
     }
-  }, [typingMessage]);
+  }, [typingMessage, shouldAutoScroll]);
+
+  // Reset auto-scroll when starting new generation
+  useEffect(() => {
+    if (isGenerating) {
+      setShouldAutoScroll(true);
+    }
+  }, [isGenerating]);
 
   const generateChatTitle = (firstMessage: string): string => {
     const words = firstMessage.split(' ').slice(0, 6);
@@ -141,7 +198,23 @@ export default function Home() {
     }
     setIsLoading(false);
     setIsGenerating(false);
+    
+    // Save partial response if there's any typed content
+    if (currentTypingContent && activeChat) {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: currentTypingContent,
+        timestamp: new Date(),
+      };
+
+      const updatedMessages = [...messages, assistantMessage];
+      setMessages(updatedMessages);
+      updateChatMessages(activeChat, updatedMessages);
+    }
+    
     setTypingMessage(null);
+    setCurrentTypingContent('');
     
     // Keep focus on textarea
     setTimeout(() => {
@@ -203,6 +276,7 @@ export default function Home() {
 
       setIsLoading(false);
       setTypingMessage(text);
+      setCurrentTypingContent(''); // Reset when new response starts
     } catch (error: any) {
       if (error.name === 'AbortError' || controller.signal.aborted) {
         // Generation was stopped by user
@@ -229,6 +303,7 @@ export default function Home() {
       setMessages(updatedMessages);
       updateChatMessages(activeChat, updatedMessages);
       setTypingMessage(null);
+      setCurrentTypingContent('');
       setIsGenerating(false);
       setAbortController(null);
       
@@ -237,6 +312,10 @@ export default function Home() {
         textareaRef.current?.focus();
       }, 100);
     }
+  };
+
+  const handlePartialUpdate = (content: string) => {
+    setCurrentTypingContent(content);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -392,7 +471,13 @@ export default function Home() {
                 {messages.map(message => (
                   <MessageBubble key={message.id} message={message} onCopy={copyMessage} />
                 ))}
-                {typingMessage && <TypingMessage content={typingMessage} onComplete={handleTypingComplete} />}
+                {typingMessage && (
+                  <TypingMessage 
+                    content={typingMessage} 
+                    onComplete={handleTypingComplete}
+                    onPartialUpdate={handlePartialUpdate}
+                  />
+                )}
                 {isLoading && !typingMessage && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}

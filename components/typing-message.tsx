@@ -11,21 +11,23 @@ import { useTheme } from 'next-themes';
 interface TypingMessageProps {
   content: string;
   onComplete?: () => void;
+  onPartialUpdate?: (content: string) => void;
 }
 
-export function TypingMessage({ content, onComplete }: TypingMessageProps) {
+export function TypingMessage({ content, onComplete, onPartialUpdate }: TypingMessageProps) {
   const [displayedContent, setDisplayedContent] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const { theme } = useTheme();
   const messageRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll function
+  // Scroll to bottom during typing
   const scrollToBottom = () => {
-    if (messageRef.current) {
-      const scrollContainer = document.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
+    const scrollContainer = document.querySelector('[data-radix-scroll-area-viewport]');
+    if (scrollContainer) {
+      scrollContainer.scrollTo({
+        top: scrollContainer.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -35,8 +37,15 @@ export function TypingMessage({ content, onComplete }: TypingMessageProps) {
         setDisplayedContent(content.slice(0, currentIndex + 1));
         setCurrentIndex(currentIndex + 1);
         
-        // Scroll to bottom after each character is typed
-        setTimeout(scrollToBottom, 0);
+        // Call onPartialUpdate to keep parent component updated with current content
+        if (onPartialUpdate) {
+          onPartialUpdate(content.slice(0, currentIndex + 1));
+        }
+        
+        // Scroll every few characters to keep up with typing
+        if (currentIndex % 5 === 0) {
+          scrollToBottom();
+        }
       }, 10); // Faster typing speed
 
       return () => clearTimeout(timer);
@@ -45,7 +54,7 @@ export function TypingMessage({ content, onComplete }: TypingMessageProps) {
     }
   }, [currentIndex, content, onComplete]);
 
-  // Also scroll when component mounts
+  // Scroll when typing starts
   useEffect(() => {
     scrollToBottom();
   }, []);
