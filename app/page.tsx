@@ -122,7 +122,7 @@ export default function Home() {
     const originalScrollTo = scrollContainer.scrollTo;
     scrollContainer.scrollTo = function(...args: any[]) {
       isScrolling = true;
-      originalScrollTo.apply(this, args);
+      originalScrollTo.apply(this, args as any);
       setTimeout(() => { isScrolling = false; }, 100);
     };
 
@@ -329,8 +329,18 @@ export default function Home() {
     }
   };
 
-  const copyMessage = (content: string) => {
-    navigator.clipboard.writeText(content);
+  const copyMessage = async (content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = content;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
     toast.success('Message copied to clipboard');
   };
 
