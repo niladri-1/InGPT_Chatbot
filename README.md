@@ -1,6 +1,9 @@
 # 🤖 InGPT
 
 <div align="center">
+
+  ![ChatBot Banner](app/preview_img.png)
+
   <img src="https://img.shields.io/badge/Next.js-13+-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
@@ -45,7 +48,7 @@
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Google AI Studio API Key
 
@@ -68,7 +71,7 @@
    ```bash
    cp .env.example .env.local
    ```
-   
+
    Add your Gemini API key to `.env.local`:
    ```env
    NEXT_PUBLIC_GEMINI_API_KEY=your_actual_api_key_here
@@ -190,10 +193,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <p>Made with ❤️ by <a href="https://github.com/yourusername">Your Name</a></p>
+  <p>Made with ❤️ by <a href="https://github.com/niladri-1">Niladri Chatterjee</a></p>
   <p>
-    <a href="https://github.com/yourusername/ingpt">⭐ Star this repo</a> •
-    <a href="https://github.com/yourusername/ingpt/issues">🐛 Report Bug</a> •
-    <a href="https://github.com/yourusername/ingpt/issues">💡 Request Feature</a>
+    <a href="https://github.com/niladri-1/InGPT_Chatbot">⭐ Star this repo</a> •
+    <a href="https://github.com/niladri-1/InGPT_Chatbot/issues">🐛 Report Bug</a> •
+    <a href="https://github.com/niladri-1/InGPT_Chatbot/issues">💡 Request Feature</a>
   </p>
 </div>
